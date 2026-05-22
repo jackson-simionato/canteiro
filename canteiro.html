@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Canteiro — seu jardim comestível</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --verde:#1a2e1a;--verde-mid:#4a7a4a;--verde-light:#e0ede0;
+  --creme:#f5f2ec;--creme-dark:#ede9e1;--terra:#d4a96a;--terra-dark:#a07840;
+  --text:#1a2e1a;--text-mid:#4a5a4a;--text-muted:#6b7c6b;--text-faint:#9aaa9a;
+  --border:#d4dcd4;--serif:'DM Serif Display',serif;--sans:'DM Sans',sans-serif;
+}
+html,body{min-height:100%;background:var(--creme);font-family:var(--sans);}
+body{display:flex;flex-direction:column;align-items:center;padding:0 0 40px;}
+
+.app{width:100%;max-width:480px;background:var(--creme);min-height:100vh;}
+
+.header{background:var(--verde);padding:18px 20px 14px;position:sticky;top:0;z-index:100;}
+.header-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.logo{display:flex;align-items:center;gap:9px;}
+.logo-mark{width:30px;height:30px;background:rgba(255,255,255,0.12);border-radius:8px;display:flex;align-items:center;justify-content:center;}
+.logo-name{font-family:var(--serif);font-size:19px;color:#f5f2ec;}
+.header-date{font-size:11px;color:rgba(245,242,236,0.4);letter-spacing:0.03em;}
+.xp-bar-wrap{background:rgba(255,255,255,0.1);border-radius:20px;height:5px;margin-bottom:5px;}
+.xp-bar{background:var(--terra);border-radius:20px;height:5px;transition:width 0.6s ease;}
+.xp-label{display:flex;justify-content:space-between;font-size:11px;color:rgba(245,242,236,0.4);}
+
+.clima-strip{background:rgba(0,0,0,0.18);border-radius:10px;padding:11px 13px;margin-top:11px;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;}
+.clima-main{display:flex;align-items:center;gap:10px;}
+.clima-icon{font-size:22px;color:rgba(245,242,236,0.8);}
+.clima-temp{font-family:var(--serif);font-size:24px;color:#f5f2ec;line-height:1;}
+.clima-desc{font-size:11px;color:rgba(245,242,236,0.5);margin-top:2px;}
+.clima-forecast{display:flex;gap:5px;}
+.fc-day{text-align:center;background:rgba(255,255,255,0.07);border-radius:7px;padding:5px 6px;min-width:36px;}
+.fc-name{font-size:10px;color:rgba(245,242,236,0.4);margin-bottom:2px;}
+.fc-icon{font-size:12px;color:rgba(245,242,236,0.65);margin-bottom:2px;}
+.fc-temp{font-size:11px;font-weight:500;color:rgba(245,242,236,0.7);}
+.fc-rain{font-size:10px;color:rgba(212,169,106,0.85);}
+
+.nav{display:flex;background:var(--creme-dark);border-bottom:0.5px solid var(--border);overflow-x:auto;position:sticky;top:0;z-index:99;}
+.nav::-webkit-scrollbar{display:none;}
+.nav-btn{flex:1;min-width:56px;padding:11px 3px;font-family:var(--sans);font-size:11px;font-weight:500;color:var(--text-muted);background:none;border:none;cursor:pointer;border-bottom:2px solid transparent;transition:all 0.15s;white-space:nowrap;}
+.nav-btn.active{color:var(--verde);border-bottom-color:var(--verde);background:var(--creme);}
+.nav-btn .notif{display:inline-block;width:5px;height:5px;background:var(--terra);border-radius:50%;margin-left:3px;vertical-align:2px;}
+
+.content{padding:18px 20px;display:none;}
+.content.active{display:block;}
+.section-label{font-size:11px;font-weight:500;color:var(--text-faint);letter-spacing:0.09em;text-transform:uppercase;margin-bottom:9px;}
+.card{background:#fff;border:0.5px solid var(--border);border-radius:12px;padding:15px;margin-bottom:11px;}
+.card-title{font-family:var(--serif);font-size:16px;color:var(--text);margin-bottom:4px;}
+.card-body{font-size:13px;color:var(--text-muted);line-height:1.6;}
+
+.clima-alert{border-radius:10px;padding:12px 14px;margin-bottom:11px;display:flex;gap:10px;align-items:flex-start;}
+.clima-alert-icon{font-size:18px;flex-shrink:0;margin-top:1px;}
+.clima-alert-title{font-size:13px;font-weight:500;margin-bottom:3px;}
+.clima-alert-text{font-size:12px;line-height:1.6;}
+.clima-alert-btn{display:inline-block;margin-top:7px;font-size:12px;font-weight:500;font-family:var(--sans);background:none;border:0.5px solid currentColor;border-radius:7px;padding:5px 12px;cursor:pointer;opacity:0.8;}
+.rain{background:#eef4fb;border:0.5px solid #b8d0e8;color:#2a4a6a;}
+.cold{background:#f0f4ee;border:0.5px solid #b0c8b0;color:#2a3a2a;}
+.ok-clima{background:var(--verde-light);border:0.5px solid #b0d0b0;color:#2a4a2a;}
+.warn{background:#fff8f0;border:0.5px solid #e8d0a8;color:#6b4a10;}
+
+.mission-card{background:var(--verde);border-radius:12px;padding:16px;margin-bottom:11px;}
+.mission-tag{font-size:10px;font-weight:500;color:rgba(245,242,236,0.45);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:7px;}
+.mission-title{font-family:var(--serif);font-size:19px;color:#f5f2ec;margin-bottom:5px;}
+.mission-body{font-size:13px;color:rgba(245,242,236,0.68);line-height:1.6;margin-bottom:12px;}
+.mission-footer{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+.pill{display:inline-block;font-size:11px;font-weight:500;padding:3px 9px;border-radius:20px;}
+.pill-terra{background:rgba(212,169,106,0.25);color:var(--terra);}
+.pill-green{background:var(--verde-light);color:#2a4a2a;}
+.pill-amber{background:#f5e8d0;color:#6b4a10;}
+.pill-gray{background:var(--creme-dark);color:var(--text-muted);}
+.pill-blue{background:#e8f0f8;color:#2a4a6a;}
+.btn-sm{background:var(--terra);color:var(--verde);font-family:var(--sans);font-size:12px;font-weight:500;border:none;border-radius:8px;padding:7px 13px;cursor:pointer;}
+.btn-outline{background:none;border:0.5px solid var(--verde);color:var(--verde);font-family:var(--sans);font-size:12px;font-weight:500;border-radius:8px;padding:7px 13px;cursor:pointer;}
+
+.checklist-item{display:flex;align-items:flex-start;gap:11px;padding:10px 0;border-bottom:0.5px solid var(--border);cursor:pointer;}
+.checklist-item:last-child{border-bottom:none;}
+.check-box{width:19px;height:19px;border:1.5px solid var(--border);border-radius:5px;flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;transition:all 0.15s;background:#fff;}
+.check-box.done{background:var(--verde);border-color:var(--verde);}
+.check-box.done::after{content:'';width:4px;height:8px;border:1.5px solid #fff;border-top:none;border-left:none;transform:rotate(40deg) translateY(-1px);display:block;}
+.check-text{font-size:13px;color:var(--text-mid);line-height:1.5;}
+.check-text.done{color:var(--text-faint);text-decoration:line-through;}
+.check-sub{font-size:11px;color:var(--text-faint);margin-top:2px;}
+
+.streak-row{display:flex;gap:5px;margin-bottom:12px;}
+.streak-day{flex:1;height:26px;border-radius:6px;background:var(--verde-light);display:flex;align-items:center;justify-content:center;}
+.streak-day.done{background:var(--verde);}
+.streak-day span{font-size:10px;font-weight:500;}
+.streak-day.done span{color:#f5f2ec;}
+.streak-day:not(.done) span{color:var(--text-faint);}
+.stat-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;margin-bottom:12px;}
+.stat{background:#fff;border:0.5px solid var(--border);border-radius:10px;padding:10px;text-align:center;}
+.stat-num{font-family:var(--serif);font-size:22px;color:var(--text);}
+.stat-label{font-size:10px;color:var(--text-faint);margin-top:2px;}
+
+.rec-card{background:var(--verde-light);border:0.5px solid #b0d0b0;border-radius:11px;padding:13px 15px;margin-bottom:11px;}
+.rec-label{font-size:11px;font-weight:500;color:#2a4a2a;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:4px;}
+.rec-text{font-size:13px;color:#3a5a3a;line-height:1.6;margin-bottom:7px;}
+.rec-btn{background:none;border:0.5px solid var(--verde);color:var(--verde);font-family:var(--sans);font-size:12px;font-weight:500;border-radius:7px;padding:6px 13px;cursor:pointer;}
+
+/* CLIMA TAB */
+.clima-full-card{background:#fff;border:0.5px solid var(--border);border-radius:12px;padding:15px;margin-bottom:11px;}
+.clima-hoje{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.clima-hoje-temp{font-family:var(--serif);font-size:42px;color:var(--text);line-height:1;}
+.clima-hoje-desc{font-size:13px;color:var(--text-muted);margin-top:3px;}
+.clima-hoje-loc{font-size:11px;color:var(--text-faint);margin-bottom:4px;text-align:right;}
+.clima-hoje-icon{font-size:36px;color:var(--verde-mid);}
+.forecast-row{display:flex;gap:6px;}
+.fc-card{flex:1;background:var(--creme);border-radius:8px;padding:8px 5px;text-align:center;}
+.fc-card.today{background:var(--verde-light);border:0.5px solid #b0d0b0;}
+.fc-day-name{font-size:10px;font-weight:500;color:var(--text-faint);margin-bottom:4px;}
+.fc-card.today .fc-day-name{color:#2a4a2a;}
+.fc-card-icon{font-size:16px;color:var(--text-muted);margin-bottom:3px;}
+.fc-card-temp{font-size:12px;font-weight:500;color:var(--text);}
+.fc-card-rain{font-size:10px;color:var(--terra-dark);margin-top:2px;}
+
+/* FASES */
+.fase-row{display:flex;gap:10px;margin-bottom:11px;}
+.fase-dot{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:14px;flex-shrink:0;}
+.fase-dot.active{background:var(--terra);color:var(--verde);}
+.fase-dot.locked{background:var(--creme-dark);color:var(--text-faint);}
+.fase-connector{width:1px;background:var(--border);height:13px;margin:3px 0 3px 16px;}
+.fase-name{font-size:14px;font-weight:500;color:var(--text);}
+.fase-desc{font-size:12px;color:var(--text-muted);margin-top:2px;}
+.badge-row{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:11px;}
+.badge{background:var(--creme-dark);border-radius:9px;padding:9px 11px;text-align:center;opacity:0.4;min-width:68px;}
+.badge.earned{opacity:1;background:var(--verde-light);}
+.badge-icon{font-size:18px;color:var(--text-muted);margin-bottom:3px;}
+.badge.earned .badge-icon{color:var(--verde);}
+.badge-name{font-size:11px;color:var(--text-muted);}
+.badge.earned .badge-name{color:#2a4a2a;}
+
+/* PLANTAS */
+.plant-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:11px;}
+.plant-card{background:#fff;border:0.5px solid var(--border);border-radius:10px;padding:11px;cursor:pointer;transition:border-color 0.15s;}
+.plant-card:hover{border-color:var(--verde-mid);}
+.plant-name{font-size:13px;font-weight:500;color:var(--text);margin-bottom:5px;}
+
+/* DIAGNÓSTICO */
+.diag-btn{width:100%;background:#fff;border:0.5px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;cursor:pointer;margin-bottom:7px;display:flex;align-items:center;gap:11px;font-family:var(--sans);transition:border-color 0.15s;}
+.diag-btn:hover{border-color:var(--terra);}
+.diag-icon{font-size:17px;width:26px;text-align:center;flex-shrink:0;color:var(--text-muted);}
+.diag-text{font-size:13px;font-weight:500;color:var(--text);}
+.diag-sub{font-size:12px;color:var(--text-muted);}
+
+/* CALENDÁRIO */
+.cal-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:4px;margin-bottom:9px;}
+.cal-month{background:#fff;border:0.5px solid var(--border);border-radius:7px;padding:6px 3px;text-align:center;}
+.cal-month.active{background:var(--verde);border-color:var(--verde);}
+.cal-month.warm{background:var(--verde-light);border-color:#b0d0b0;}
+.cal-month-name{font-size:11px;font-weight:500;}
+.cal-month.active .cal-month-name{color:#f5f2ec;}
+.cal-month.warm .cal-month-name{color:#2a4a2a;}
+.cal-month:not(.active):not(.warm) .cal-month-name{color:var(--text-faint);}
+.cal-dot{width:4px;height:4px;border-radius:50%;margin:3px auto 0;}
+.cal-month.active .cal-dot,.cal-month.warm .cal-dot{background:var(--verde-mid);}
+.cal-month:not(.active):not(.warm) .cal-dot{background:var(--border);}
+
+/* DIÁRIO */
+.diary-tab-bar{display:flex;gap:5px;margin-bottom:12px;}
+.dtab{flex:1;padding:7px 4px;font-family:var(--sans);font-size:12px;font-weight:500;border-radius:7px;border:0.5px solid var(--border);background:#fff;color:var(--text-muted);cursor:pointer;transition:all 0.15s;text-align:center;}
+.dtab.active{background:var(--verde);border-color:var(--verde);color:#f5f2ec;}
+.dtab-content{display:none;}
+.dtab-content.active{display:block;}
+.new-entry{background:var(--verde);border-radius:12px;padding:16px;margin-bottom:12px;}
+.new-entry-label{font-size:10px;font-weight:500;color:rgba(245,242,236,0.45);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:7px;}
+.new-entry-date{font-family:var(--serif);font-size:15px;color:#f5f2ec;margin-bottom:10px;}
+.indicator-row{display:flex;gap:7px;margin-bottom:10px;flex-wrap:wrap;}
+.ind-group{flex:1;min-width:100px;}
+.ind-label{font-size:10px;color:rgba(245,242,236,0.48);margin-bottom:4px;}
+.ind-opts{display:flex;gap:3px;}
+.ind-btn{flex:1;padding:5px 3px;font-size:11px;font-weight:500;font-family:var(--sans);border-radius:6px;border:0.5px solid rgba(255,255,255,0.14);background:rgba(255,255,255,0.07);color:rgba(245,242,236,0.52);cursor:pointer;transition:all 0.15s;text-align:center;}
+.ind-btn.sel{background:rgba(245,242,236,0.17);border-color:rgba(245,242,236,0.42);color:#f5f2ec;}
+.plant-tags-diary{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px;}
+.plant-tag{font-size:11px;font-weight:500;padding:4px 9px;border-radius:20px;border:0.5px solid rgba(255,255,255,0.16);background:rgba(255,255,255,0.07);color:rgba(245,242,236,0.52);cursor:pointer;transition:all 0.15s;}
+.plant-tag.sel{background:rgba(212,169,106,0.25);border-color:rgba(212,169,106,0.5);color:var(--terra);}
+.diary-textarea{width:100%;background:rgba(255,255,255,0.07);border:0.5px solid rgba(255,255,255,0.14);border-radius:7px;color:#f5f2ec;font-family:var(--sans);font-size:13px;line-height:1.6;padding:9px 11px;resize:none;outline:none;min-height:60px;}
+.diary-textarea::placeholder{color:rgba(245,242,236,0.26);}
+.entry-footer{display:flex;align-items:center;justify-content:space-between;margin-top:9px;flex-wrap:wrap;gap:7px;}
+.mood-row{display:flex;gap:4px;}
+.mood-btn{width:28px;height:28px;border-radius:6px;border:0.5px solid rgba(255,255,255,0.14);background:rgba(255,255,255,0.07);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s;color:var(--text-muted);}
+.mood-btn.sel{background:rgba(245,242,236,0.14);border-color:rgba(245,242,236,0.38);}
+.save-btn{background:var(--terra);color:var(--verde);font-family:var(--sans);font-size:12px;font-weight:500;border:none;border-radius:7px;padding:7px 13px;cursor:pointer;}
+.saved-msg{font-size:12px;color:rgba(245,242,236,0.55);text-align:center;padding:5px 0 0;display:none;}
+.tl-entry{display:flex;gap:11px;margin-bottom:12px;}
+.tl-left{display:flex;flex-direction:column;align-items:center;width:28px;flex-shrink:0;}
+.tl-dot-tl{width:9px;height:9px;border-radius:50%;flex-shrink:0;margin-top:4px;}
+.tl-dot-tl.great{background:var(--verde);}
+.tl-dot-tl.ok{background:var(--terra);}
+.tl-dot-tl.bad{background:#c0a0a0;}
+.tl-line{width:1px;background:var(--border);flex:1;margin-top:3px;}
+.tl-card{flex:1;background:#fff;border:0.5px solid var(--border);border-radius:9px;padding:10px 12px;}
+.tl-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;}
+.tl-date{font-size:11px;color:var(--text-faint);font-weight:500;letter-spacing:0.04em;}
+.tl-tag-item{font-size:11px;font-weight:500;padding:2px 7px;border-radius:11px;background:var(--verde-light);color:#2a4a2a;display:inline-block;margin:0 2px 2px 0;}
+.tl-ind{font-size:11px;color:var(--text-muted);margin-right:7px;}
+.tl-ind span{font-weight:500;color:var(--text-mid);}
+.tl-text-entry{font-size:13px;color:var(--text-mid);line-height:1.6;margin-top:4px;}
+.insights-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;margin-bottom:11px;}
+.insight{background:#fff;border:0.5px solid var(--border);border-radius:9px;padding:10px;text-align:center;}
+.insight-num{font-family:var(--serif);font-size:20px;color:var(--text);}
+.insight-label{font-size:11px;color:var(--text-faint);margin-top:2px;line-height:1.4;}
+
+.clima-loading{text-align:center;padding:20px;color:var(--text-faint);font-size:13px;}
+.clima-error{background:#fff8f0;border:0.5px solid #e8d0a8;border-radius:10px;padding:12px 14px;font-size:13px;color:#6b4a10;margin-bottom:11px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="header-top">
+      <div class="logo">
+        <div class="logo-mark">
+          <svg width="15" height="15" viewBox="0 0 28 28" fill="none">
+            <path d="M14 4C14 4 8 8 8 15C8 19 11 22 14 22C17 22 20 19 20 15C20 8 14 4 14 4Z" stroke="#f5f2ec" stroke-width="1.3" fill="none"/>
+            <path d="M14 22L14 26" stroke="#f5f2ec" stroke-width="1.3" stroke-linecap="round"/>
+            <path d="M10 14C10 14 7 13 5 15" stroke="#f5f2ec" stroke-width="1" stroke-linecap="round"/>
+            <path d="M18 14C18 14 21 13 23 15" stroke="#f5f2ec" stroke-width="1" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <span class="logo-name">Canteiro</span>
+      </div>
+      <span class="header-date" id="header-date">Florianópolis</span>
+    </div>
+    <div class="xp-bar-wrap"><div class="xp-bar" id="xpbar" style="width:22%"></div></div>
+    <div class="xp-label"><span id="fase-label">Fase 1 — Brotando</span><span id="xplabel">22 / 100 XP</span></div>
+    <div class="clima-strip" id="clima-strip">
+      <div class="clima-main">
+        <i class="ti ti-loader clima-icon" id="clima-strip-icon" aria-hidden="true"></i>
+        <div>
+          <div class="clima-temp" id="clima-strip-temp">Carregando...</div>
+          <div class="clima-desc" id="clima-strip-desc">buscando clima de Floripa</div>
+        </div>
+      </div>
+      <div class="clima-forecast" id="clima-forecast-strip"></div>
+    </div>
+  </div>
+
+  <div class="nav">
+    <button class="nav-btn active" onclick="show('inicio')">Início</button>
+    <button class="nav-btn" onclick="show('clima')">Clima<span class="notif" id="clima-notif" style="display:none"></span></button>
+    <button class="nav-btn" onclick="show('diario')">Diário<span class="notif" id="diario-notif"></span></button>
+    <button class="nav-btn" onclick="show('fases')">Fases</button>
+    <button class="nav-btn" onclick="show('plantas')">Plantas</button>
+    <button class="nav-btn" onclick="show('diagnostico')">Diag.</button>
+    <button class="nav-btn" onclick="show('calendario')">Calendário</button>
+  </div>
+
+  <!-- INÍCIO -->
+  <div class="content active" id="tab-inicio">
+    <div id="diary-status-card" class="clima-alert warn" style="cursor:pointer" onclick="show('diario')">
+      <i class="ti ti-notebook clima-alert-icon" aria-hidden="true"></i>
+      <div><div class="clima-alert-title">Ainda não registrou hoje</div><div class="clima-alert-text">Leva 1 minuto — toque para abrir o diário.</div></div>
+    </div>
+    <div id="clima-alerts-inicio"><div class="clima-loading"><i class="ti ti-loader" style="font-size:16px;margin-right:6px"></i>Buscando clima de Floripa...</div></div>
+    <div class="mission-card">
+      <div class="mission-tag">Missão desta semana</div>
+      <div class="mission-title">Plantar sua primeira erva</div>
+      <div class="mission-body" id="mission-body">Cebolinha é perfeita pra começar. Vai bem no parapeito e em 2 semanas você já colhe.</div>
+      <div class="mission-footer">
+        <div style="display:flex;gap:5px;flex-wrap:wrap"><span class="pill pill-terra">5 min</span><span class="pill pill-terra">Iniciante</span><span class="pill pill-blue" id="mission-clima-pill" style="display:none"></span></div>
+        <button class="btn-sm" onclick="openClaude('Me dá o passo a passo para plantar cebolinha no parapeito em Florianópolis — vaso, substrato, rega, luz')">Ver passo a passo ↗</button>
+      </div>
+    </div>
+    <p class="section-label">Checklist do dia</p>
+    <div class="card" style="padding:3px 14px;" id="checklist-dinamico"><div style="padding:12px 0;font-size:13px;color:var(--text-faint)">Carregando checklist...</div></div>
+    <p class="section-label">Streak</p>
+    <div class="streak-row">
+      <div class="streak-day done"><span>S</span></div><div class="streak-day done"><span>T</span></div>
+      <div class="streak-day done"><span>Q</span></div><div class="streak-day done"><span>Q</span></div>
+      <div class="streak-day done"><span>S</span></div><div class="streak-day"><span>S</span></div>
+      <div class="streak-day"><span>D</span></div>
+    </div>
+    <div class="stat-row">
+      <div class="stat"><div class="stat-num">1</div><div class="stat-label">planta viva</div></div>
+      <div class="stat"><div class="stat-num">5</div><div class="stat-label">dias seguidos</div></div>
+      <div class="stat"><div class="stat-num" id="stat-xp">22</div><div class="stat-label">XP ganhos</div></div>
+    </div>
+    <div class="rec-card" id="inicio-rec" style="display:none">
+      <div class="rec-label"><i class="ti ti-sparkles" style="font-size:11px;margin-right:4px"></i>Com base no seu último registro</div>
+      <div class="rec-text" id="inicio-rec-text"></div>
+      <button class="rec-btn" id="inicio-rec-btn">Conversar sobre isso ↗</button>
+    </div>
+    <div class="card" style="background:var(--verde-light);border-color:#b0d0b0;" id="dica-card">
+      <div style="font-size:12px;font-weight:500;color:#2a4a2a;margin-bottom:4px">Dica do Canteiro</div>
+      <div style="font-size:13px;color:#3a5a3a;line-height:1.6">Sua sacada NE recebe sol da manhã até ~13h. Posicione ervas no canto mais ensolarado do parapeito — elas agradecem as primeiras horas da manhã.</div>
+    </div>
+  </div>
+
+  <!-- CLIMA -->
+  <div class="content" id="tab-clima">
+    <p class="section-label">Agora em Florianópolis</p>
+    <div class="clima-full-card" id="clima-full-card"><div class="clima-loading"><i class="ti ti-loader" style="font-size:16px;margin-right:6px"></i>Buscando dados de clima...</div></div>
+    <p class="section-label">Impacto no canteiro hoje</p>
+    <div id="clima-impacts"><div class="clima-loading">Aguardando dados...</div></div>
+    <div class="card">
+      <div class="card-title">Perguntar sobre o clima</div>
+      <div class="card-body" style="margin-bottom:10px">O que o tempo de hoje significa para as suas plantas especificamente?</div>
+      <button class="btn-sm" style="width:100%;text-align:center" onclick="askClimaFull()">Analisar com contexto completo ↗</button>
+    </div>
+  </div>
+
+  <!-- DIÁRIO -->
+  <div class="content" id="tab-diario">
+    <div class="diary-tab-bar">
+      <button class="dtab active" onclick="showDiaryTab('registrar',this)">Registrar</button>
+      <button class="dtab" onclick="showDiaryTab('historico',this)">Histórico</button>
+      <button class="dtab" onclick="showDiaryTab('insights',this)">Insights</button>
+    </div>
+    <div class="dtab-content active" id="dtab-registrar">
+      <div class="new-entry">
+        <div class="new-entry-label">Nova entrada</div>
+        <div class="new-entry-date" id="entry-date">—</div>
+        <div class="indicator-row">
+          <div class="ind-group"><div class="ind-label">Como estão as plantas?</div><div class="ind-opts"><button class="ind-btn" onclick="selInd(this,'saude')" data-val="ótimas">Ótimas</button><button class="ind-btn" onclick="selInd(this,'saude')" data-val="ok">Ok</button><button class="ind-btn" onclick="selInd(this,'saude')" data-val="preocupado">Preocup.</button></div></div>
+          <div class="ind-group"><div class="ind-label">Você regou?</div><div class="ind-opts"><button class="ind-btn" onclick="selInd(this,'rega')" data-val="sim">Sim</button><button class="ind-btn" onclick="selInd(this,'rega')" data-val="não">Não</button></div></div>
+          <div class="ind-group"><div class="ind-label">Tempo hoje</div><div class="ind-opts"><button class="ind-btn" onclick="selInd(this,'tempo')" data-val="sol" id="pre-tempo-sol">Sol</button><button class="ind-btn" onclick="selInd(this,'tempo')" data-val="nublado" id="pre-tempo-nublado">Nublado</button><button class="ind-btn" onclick="selInd(this,'tempo')" data-val="chuva" id="pre-tempo-chuva">Chuva</button></div></div>
+        </div>
+        <div class="ind-label" style="color:rgba(245,242,236,0.45);margin-bottom:5px;font-size:10px;">Qual planta?</div>
+        <div class="plant-tags-diary">
+          <span class="plant-tag" onclick="togglePlant(this)">Cebolinha</span>
+          <span class="plant-tag" onclick="togglePlant(this)">Salsinha</span>
+          <span class="plant-tag" onclick="togglePlant(this)">Hortelã</span>
+          <span class="plant-tag" onclick="togglePlant(this)">Morango</span>
+          <span class="plant-tag" onclick="togglePlant(this)">Geral</span>
+        </div>
+        <textarea class="diary-textarea" id="diary-note" placeholder="O que você observou hoje?"></textarea>
+        <div class="entry-footer">
+          <div>
+            <div class="ind-label" style="color:rgba(245,242,236,0.38);font-size:10px;margin-bottom:4px;">Como você se sente?</div>
+            <div class="mood-row">
+              <button class="mood-btn" onclick="selMood(this)" data-mood="animado" aria-label="Animado"><i class="ti ti-mood-happy" style="font-size:14px"></i></button>
+              <button class="mood-btn" onclick="selMood(this)" data-mood="tranquilo" aria-label="Tranquilo"><i class="ti ti-mood-smile" style="font-size:14px"></i></button>
+              <button class="mood-btn" onclick="selMood(this)" data-mood="preocupado" aria-label="Preocupado"><i class="ti ti-mood-confuzed" style="font-size:14px"></i></button>
+              <button class="mood-btn" onclick="selMood(this)" data-mood="frustrado" aria-label="Frustrado"><i class="ti ti-mood-sad" style="font-size:14px"></i></button>
+            </div>
+          </div>
+          <button class="save-btn" onclick="saveEntry()">Salvar +10 XP</button>
+        </div>
+        <div class="saved-msg" id="saved-msg">Registro salvo!</div>
+      </div>
+      <div class="rec-card" id="rec-box">
+        <div class="rec-label"><i class="ti ti-sparkles" style="font-size:11px;margin-right:4px"></i>Com base nos seus registros</div>
+        <div class="rec-text" id="rec-text">Salve seu primeiro registro e o Canteiro começa a aprender com você.</div>
+        <button class="rec-btn" id="rec-btn" onclick="askRec()" style="display:none">Pedir recomendação ↗</button>
+      </div>
+    </div>
+    <div class="dtab-content" id="dtab-historico">
+      <p class="section-label">Seus registros</p>
+      <div id="timeline">
+        <div class="tl-entry"><div class="tl-left"><div class="tl-dot-tl great"></div><div class="tl-line"></div></div><div class="tl-card"><div class="tl-header"><span class="tl-date">QUA, 21 MAI</span><span><i class="ti ti-mood-happy" style="font-size:14px;color:var(--verde-mid)"></i></span></div><div><span class="tl-tag-item">Cebolinha</span><span class="tl-tag-item">Salsinha</span></div><div style="margin-top:4px"><span class="tl-ind"><span>Plantas:</span> ótimas</span><span class="tl-ind"><span>Regou:</span> sim</span><span class="tl-ind"><span>Tempo:</span> sol</span></div><div class="tl-text-entry">Cebolinha cresceu bastante. Salsinha com folhas bem verdes. Primeira vez que senti que está dando certo.</div></div></div>
+        <div class="tl-entry"><div class="tl-left"><div class="tl-dot-tl ok"></div><div class="tl-line"></div></div><div class="tl-card"><div class="tl-header"><span class="tl-date">SEG, 19 MAI</span><span><i class="ti ti-mood-confuzed" style="font-size:14px;color:var(--terra-dark)"></i></span></div><div><span class="tl-tag-item">Cebolinha</span></div><div style="margin-top:4px"><span class="tl-ind"><span>Plantas:</span> ok</span><span class="tl-ind"><span>Regou:</span> não</span><span class="tl-ind"><span>Tempo:</span> nublado</span></div><div class="tl-text-entry">Ponta de uma folha ficou amarela. Fiquei preocupado.</div></div></div>
+        <div class="tl-entry"><div class="tl-left"><div class="tl-dot-tl great"></div></div><div class="tl-card"><div class="tl-header"><span class="tl-date">SAB, 17 MAI</span><span><i class="ti ti-mood-smile" style="font-size:14px;color:var(--verde-mid)"></i></span></div><div><span class="tl-tag-item">Geral</span></div><div style="margin-top:4px"><span class="tl-ind"><span>Plantas:</span> ótimas</span><span class="tl-ind"><span>Regou:</span> sim</span><span class="tl-ind"><span>Tempo:</span> sol</span></div><div class="tl-text-entry">Primeiro dia plantando a cebolinha. Animado!</div></div></div>
+      </div>
+    </div>
+    <div class="dtab-content" id="dtab-insights">
+      <p class="section-label">Últimos 30 dias</p>
+      <div class="insights-row">
+        <div class="insight"><div class="insight-num" id="ins-reg">3</div><div class="insight-label">registros feitos</div></div>
+        <div class="insight"><div class="insight-num" id="ins-regas">2</div><div class="insight-label">vezes que regou</div></div>
+        <div class="insight"><div class="insight-num" id="ins-humor">2</div><div class="insight-label">dias bem-humorado</div></div>
+      </div>
+      <p class="section-label">O que o diário revela</p>
+      <div class="card"><div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:4px">Você rega com consistência</div><div style="font-size:13px;color:var(--text-muted);line-height:1.6">2 de 3 registros incluem rega — ótimo ritmo para essa fase.</div></div>
+      <div class="rec-card"><div class="rec-label"><i class="ti ti-sparkles" style="font-size:11px;margin-right:3px"></i>Próximo passo</div><div class="rec-text" id="prox-passo-text">Com 3 registros, você está pronto para adicionar uma segunda planta. Morango é ideal para maio em Floripa.</div><button class="rec-btn" onclick="openClaude('Com base no meu diário — 3 registros, cebolinha indo bem, Florianópolis sacada NE — estou pronto para plantar morango agora em maio?')">Conversar ↗</button></div>
+    </div>
+  </div>
+
+  <!-- FASES -->
+  <div class="content" id="tab-fases">
+    <p class="section-label">Sua jornada</p>
+    <div class="fase-row"><div style="display:flex;flex-direction:column;align-items:center"><div class="fase-dot active">1</div><div class="fase-connector"></div></div><div><div class="fase-name">Brotando <span class="pill pill-terra" style="margin-left:5px">atual</span></div><div class="fase-desc">Primeiras ervas, rotina de cuidado, entender sua varanda</div><div style="margin-top:7px;display:flex;gap:5px;flex-wrap:wrap"><span class="pill pill-green">Cebolinha</span><span class="pill pill-green">Salsinha</span><span class="pill pill-amber">Hortelã</span></div></div></div>
+    <div class="fase-row"><div style="display:flex;flex-direction:column;align-items:center"><div class="fase-dot locked">2</div><div class="fase-connector"></div></div><div><div class="fase-name" style="color:var(--text-faint)">Cultivando</div><div class="fase-desc">Diagnóstico de problemas, mais espécies, primeiro morango</div><div style="margin-top:5px"><span class="pill pill-gray">Bloqueado — 100 XP</span></div></div></div>
+    <div class="fase-row"><div style="display:flex;flex-direction:column;align-items:center"><div class="fase-dot locked">3</div><div class="fase-connector"></div></div><div><div class="fase-name" style="color:var(--text-faint)">Colhendo</div><div class="fase-desc">Tomate-cereja, propagação, primeiro prato da varanda</div><div style="margin-top:5px"><span class="pill pill-gray">Bloqueado — 250 XP</span></div></div></div>
+    <div class="fase-row"><div style="display:flex;flex-direction:column;align-items:center"><div class="fase-dot locked">4</div></div><div><div class="fase-name" style="color:var(--text-faint)">Hortelão</div><div class="fase-desc">Ciclo completo, compostagem, sazonalidade de Floripa</div><div style="margin-top:5px"><span class="pill pill-gray">Bloqueado — 500 XP</span></div></div></div>
+    <p class="section-label" style="margin-top:8px">Conquistas</p>
+    <div class="badge-row">
+      <div class="badge earned"><div class="badge-icon"><i class="ti ti-plant-2"></i></div><div class="badge-name">Primeira muda</div></div>
+      <div class="badge earned"><div class="badge-icon"><i class="ti ti-droplet"></i></div><div class="badge-name">5 dias regando</div></div>
+      <div class="badge"><div class="badge-icon"><i class="ti ti-scissors"></i></div><div class="badge-name">1ª colheita</div></div>
+      <div class="badge"><div class="badge-icon"><i class="ti ti-heart"></i></div><div class="badge-name">Ressuscitou</div></div>
+      <div class="badge"><div class="badge-icon"><i class="ti ti-star"></i></div><div class="badge-name">30 dias</div></div>
+    </div>
+  </div>
+
+  <!-- PLANTAS -->
+  <div class="content" id="tab-plantas">
+    <p class="section-label">Compatíveis com sua varanda NE</p>
+    <div class="plant-grid">
+      <div class="plant-card" onclick="openClaude('Me conta tudo sobre cultivar cebolinha no parapeito em Florianópolis')"><div class="plant-name">Cebolinha</div><div style="display:flex;gap:4px;flex-wrap:wrap"><span class="pill pill-green">Fácil</span><span class="pill pill-gray">4h sol</span></div></div>
+      <div class="plant-card" onclick="openClaude('Como cultivar salsinha em Florianópolis, sacada NE sol parcial?')"><div class="plant-name">Salsinha</div><div style="display:flex;gap:4px;flex-wrap:wrap"><span class="pill pill-green">Fácil</span><span class="pill pill-gray">3h sol</span></div></div>
+      <div class="plant-card" onclick="openClaude('Dicas para cultivar hortelã no apartamento sem invadir o vaso')"><div class="plant-name">Hortelã</div><div style="display:flex;gap:4px;flex-wrap:wrap"><span class="pill pill-green">Fácil</span><span class="pill pill-gray">vaso isolado</span></div></div>
+      <div class="plant-card" onclick="openClaude('Tomilho em Florianópolis — resistente ao inverno? Como cultivar no parapeito?')"><div class="plant-name">Tomilho</div><div style="display:flex;gap:4px;flex-wrap:wrap"><span class="pill pill-green">Fácil</span><span class="pill pill-gray">5h sol</span></div></div>
+      <div class="plant-card" onclick="openClaude('Morango em varanda de apartamento — qual variedade para Floripa?')"><div class="plant-name">Morango</div><div style="display:flex;gap:4px;flex-wrap:wrap"><span class="pill pill-amber">Médio</span><span class="pill pill-gray">5h sol</span></div></div>
+      <div class="plant-card" onclick="openClaude('Tomate-cereja anão em varanda pequena — variedades para Florianópolis')"><div class="plant-name">Tomate-cereja</div><div style="display:flex;gap:4px;flex-wrap:wrap"><span class="pill pill-amber">Médio</span><span class="pill pill-gray">fase 2</span></div></div>
+    </div>
+    <div class="card" style="background:#fff8f0;border-color:#e8d0a8"><div style="font-size:12px;font-weight:500;color:#6b4a10;margin-bottom:4px"><i class="ti ti-info-circle" style="font-size:12px;margin-right:4px"></i>Atenção verão</div><div style="font-size:13px;color:#7a5520;line-height:1.6">Entre dez–mar a sacada NE pode ficar muito quente. Manjericão e alface precisarão de meia-sombra.</div></div>
+  </div>
+
+  <!-- DIAGNÓSTICO -->
+  <div class="content" id="tab-diagnostico">
+    <p class="section-label">O que está acontecendo?</p>
+    <button class="diag-btn" onclick="openClaude('Minha planta está com folhas amarelas — o que pode ser? Florianópolis, sacada NE, sol parcial')"><i class="ti ti-leaf-off diag-icon"></i><div><div class="diag-text">Folhas amarelas</div><div class="diag-sub">Excesso de água, falta de luz ou nutrição</div></div></button>
+    <button class="diag-btn" onclick="openClaude('Minha planta murcha mesmo regando — o que pode estar errado? Floripa, sacada NE')"><i class="ti ti-droplet-off diag-icon"></i><div><div class="diag-text">Murcha mesmo regando</div><div class="diag-sub">Raiz podre, drenagem ruim, calor excessivo</div></div></button>
+    <button class="diag-btn" onclick="openClaude('Encontrei bichinhos na minha planta — como tratar de forma natural para horta comestível?')"><i class="ti ti-bug diag-icon"></i><div><div class="diag-text">Bichinhos ou manchas</div><div class="diag-sub">Pragas comuns em varandas úmidas</div></div></button>
+    <button class="diag-btn" onclick="openClaude('Minha planta está crescendo torta ou com caule fraco — o que significa?')"><i class="ti ti-trending-down diag-icon"></i><div><div class="diag-text">Crescimento fraco ou torto</div><div class="diag-sub">Geralmente falta de luz</div></div></button>
+    <button class="diag-btn" onclick="openClaude('Minha planta morreu. Me ajuda a entender o que aconteceu — sem culpa')"><i class="ti ti-heart-broken diag-icon"></i><div><div class="diag-text">Minha planta morreu</div><div class="diag-sub">O que aprender com isso</div></div></button>
+  </div>
+
+  <!-- CALENDÁRIO -->
+  <div class="content" id="tab-calendario">
+    <p class="section-label">Florianópolis — o que plantar agora</p>
+    <div class="cal-grid" id="cal-grid"></div>
+    <div style="display:flex;gap:10px;margin-bottom:14px;font-size:11px;align-items:center;flex-wrap:wrap">
+      <div style="display:flex;align-items:center;gap:4px"><div style="width:10px;height:10px;border-radius:3px;background:var(--verde)"></div><span style="color:var(--text-muted)">Agora</span></div>
+      <div style="display:flex;align-items:center;gap:4px"><div style="width:10px;height:10px;border-radius:3px;background:var(--verde-light);border:0.5px solid #b0d0b0"></div><span style="color:var(--text-muted)">Ótimo para plantar</span></div>
+      <div style="display:flex;align-items:center;gap:4px"><div style="width:10px;height:10px;border-radius:3px;background:var(--creme-dark);border:0.5px solid var(--border)"></div><span style="color:var(--text-muted)">Mais lento</span></div>
+    </div>
+    <p class="section-label" id="cal-mes-label">Carregando...</p>
+    <div id="cal-dicas"></div>
+  </div>
+</div>
+
+<script>
+// ── ESTADO ──────────────────────────────────────────────────────────────
+const S = {saude:null,rega:null,tempo:null,plantas:[],mood:null,entries:[],xp:22,registrouHoje:false};
+let WEATHER = null;
+
+const DAYS_PT = ['Domingo','Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sábado'];
+const MONTHS_PT = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+const MONTHS_SHORT = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+const FC_SHORT = ['Hoje','Amanhã','Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+
+const ICONS_MAP = {sunny:'ti-sun',partly_cloudy:'ti-cloud-sun',cloudy:'ti-cloud',rain:'ti-cloud-rain',drizzle:'ti-cloud-drizzle',storm:'ti-storm',snow:'ti-snowflake',fog:'ti-mist'};
+function wIcon(c){return ICONS_MAP[c]||'ti-cloud';}
+
+const now = new Date();
+document.getElementById('entry-date').textContent = DAYS_PT[now.getDay()]+', '+now.getDate()+' de '+MONTHS_PT[now.getMonth()];
+document.getElementById('header-date').textContent = 'Florianópolis · '+MONTHS_PT[now.getMonth()]+' '+now.getFullYear();
+
+// ── CLIMA ────────────────────────────────────────────────────────────────
+async function fetchClima() {
+  try {
+    const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=-27.5856&longitude=-48.4967&current=temperature_2m,weathercode,windspeed_10m&daily=temperature_2m_max,precipitation_probability_max,weathercode&timezone=America%2FSao_Paulo&forecast_days=5');
+    const d = await res.json();
+    const wc = d.current.weathercode;
+    const cond = wcToCondition(wc);
+    WEATHER = {
+      temp: Math.round(d.current.temperature_2m),
+      windspeed: Math.round(d.current.windspeed_10m),
+      condition: cond,
+      desc: wcToDesc(wc),
+      forecast: d.daily.time.slice(0,5).map((t,i)=>({
+        day: i===0?'Hoje':i===1?'Amanhã':['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'][new Date(t).getDay()],
+        condition: wcToCondition(d.daily.weathercode[i]),
+        high: Math.round(d.daily.temperature_2m_max[i]),
+        rain: d.daily.precipitation_probability_max[i]
+      }))
+    };
+    applyClima();
+  } catch(e) {
+    document.getElementById('clima-strip-temp').textContent = '—';
+    document.getElementById('clima-strip-desc').textContent = 'Sem conexão';
+    document.getElementById('clima-strip-icon').className = 'ti ti-wifi-off clima-icon';
+    document.getElementById('clima-alerts-inicio').innerHTML = '<div class="clima-error"><i class="ti ti-wifi-off" style="margin-right:6px"></i>Não foi possível buscar o clima. Verifique sua conexão.</div>';
+    document.getElementById('clima-impacts').innerHTML = '<div class="clima-error">Sem dados de clima disponíveis.</div>';
+    document.getElementById('clima-full-card').innerHTML = '<div class="clima-error">Sem dados de clima disponíveis.</div>';
+    renderChecklistStatic();
+  }
+}
+
+function wcToCondition(wc) {
+  if(wc<=1) return 'sunny';
+  if(wc<=3) return 'partly_cloudy';
+  if(wc<=49) return 'cloudy';
+  if(wc<=69) return 'rain';
+  if(wc<=79) return 'snow';
+  if(wc<=99) return 'storm';
+  return 'cloudy';
+}
+function wcToDesc(wc) {
+  if(wc===0) return 'Céu limpo';
+  if(wc===1) return 'Principalmente limpo';
+  if(wc===2) return 'Parcialmente nublado';
+  if(wc===3) return 'Nublado';
+  if(wc<=49) return 'Neblina';
+  if(wc<=59) return 'Garoa';
+  if(wc<=69) return 'Chuva';
+  if(wc<=79) return 'Neve';
+  if(wc<=82) return 'Chuva forte';
+  return 'Tempestade';
+}
+
+function applyClima() {
+  if(!WEATHER) return;
+  const W = WEATHER;
+  // Strip
+  document.getElementById('clima-strip-temp').textContent = W.temp+'°C';
+  document.getElementById('clima-strip-desc').textContent = W.desc+(W.windspeed>30?' · vento '+W.windspeed+'km/h':'')+' · Floripa';
+  document.getElementById('clima-strip-icon').className = 'ti '+wIcon(W.condition)+' clima-icon';
+  // Forecast strip
+  const fs = document.getElementById('clima-forecast-strip');
+  fs.innerHTML = W.forecast.slice(1,4).map(f=>`<div class="fc-day"><div class="fc-name">${f.day}</div><div><i class="ti ${wIcon(f.condition)} fc-icon"></i></div><div class="fc-temp">${f.high}°</div>${f.rain>=30?`<div class="fc-rain">${f.rain}%</div>`:''}</div>`).join('');
+  // Full forecast card
+  document.getElementById('clima-full-card').innerHTML = `
+    <div class="clima-hoje">
+      <div><div class="clima-hoje-temp">${W.temp}°C</div><div class="clima-hoje-desc">${W.desc}${W.windspeed>25?' · vento '+W.windspeed+'km/h':''}</div></div>
+      <div><div class="clima-hoje-loc">Florianópolis · sacada NE</div><i class="ti ${wIcon(W.condition)} clima-hoje-icon"></i></div>
+    </div>
+    <div class="forecast-row">${W.forecast.map((f,i)=>`<div class="fc-card ${i===0?'today':''}"><div class="fc-day-name">${f.day}</div><div class="fc-card-icon"><i class="ti ${wIcon(f.condition)}"></i></div><div class="fc-card-temp">${f.high}°C</div><div class="fc-card-rain">${f.rain>=20?f.rain+'% chuva':''}</div></div>`).join('')}</div>`;
+  // Impacts
+  renderImpacts('clima-alerts-inicio');
+  renderImpacts('clima-impacts');
+  renderChecklist();
+  preFillTempo();
+  // Mission pill
+  if(W.forecast[0].rain>=40){
+    const p=document.getElementById('mission-clima-pill');
+    p.style.display='inline-block';
+    p.textContent='Chuva hoje — não regar';
+    document.getElementById('mission-body').textContent='Boa notícia: com chuva prevista hoje, você não precisa regar. Aproveite para observar as plantas.';
+  }
+  if(W.forecast[1]&&W.forecast[1].rain>=50) document.getElementById('clima-notif').style.display='inline-block';
+}
+
+function buildImpacts() {
+  if(!WEATHER) return [];
+  const W = WEATHER; const rain0=W.forecast[0].rain; const rain1=W.forecast[1]?W.forecast[1].rain:0;
+  const impacts=[];
+  if(rain0>=40) impacts.push({cls:'rain',icon:'ti-cloud-rain',title:`Não regue hoje (${rain0}% de chuva)`,text:'A terra vai ficar úmida o suficiente. Regar por cima aumenta risco de apodrecimento de raiz.',btn:null});
+  else if(rain0<25&&W.temp>16) impacts.push({cls:'ok-clima',icon:'ti-droplet',title:'Boa hora para regar',text:'Pouca chuva prevista. Regue cedo pela manhã para aproveitar o sol da sacada NE.',btn:null});
+  else impacts.push({cls:'ok-clima',icon:'ti-droplet-check',title:'Verifique a umidade antes de regar',text:'Enfie o dedo 2cm na terra — só regue se estiver seco.',btn:null});
+  if(rain1>=50) impacts.push({cls:'rain',icon:'ti-umbrella',title:`Chuva forte amanhã (${rain1}%)`,text:'Se tiver vasos em parapeito aberto, considere movê-los para local com cobertura.',btn:null});
+  if(W.temp<12) impacts.push({cls:'cold',icon:'ti-temperature-minus',title:`Temperatura baixa — ${W.temp}°C`,text:'Abaixo de 12°C manjericão sofre. Cebolinha e tomilho aguentam bem.',btn:null});
+  else impacts.push({cls:'ok-clima',icon:'ti-temperature',title:`${W.temp}°C — temperatura ${W.temp<=22?'ideal':'elevada'}`,text:W.temp<=22?'Faixa perfeita para ervas de inverno. Cebolinha, salsinha e tomilho crescem bem nesse clima.':'Temperatura alta — monitore a umidade do solo com mais frequência.',btn:null});
+  if(W.windspeed>25) impacts.push({cls:'warn',icon:'ti-wind',title:`Vento forte — ${W.windspeed}km/h`,text:'Verifique se os vasos estão estáveis no parapeito. Mudas recém plantadas são mais vulneráveis.',btn:{label:'Como proteger contra vento ↗',prompt:'Como proteger vasos no parapeito do vento forte em Florianópolis?'}});
+  return impacts;
+}
+
+function renderImpacts(id) {
+  const el=document.getElementById(id); if(!el) return;
+  const impacts=buildImpacts();
+  el.innerHTML=impacts.map(i=>`<div class="clima-alert ${i.cls}" style="margin-bottom:10px"><i class="ti ${i.icon} clima-alert-icon"></i><div class="clima-alert-body"><div class="clima-alert-title">${i.title}</div><div class="clima-alert-text">${i.text}</div>${i.btn?`<button class="clima-alert-btn" onclick="openClaude('${i.btn.prompt}')">${i.btn.label}</button>`:''}</div></div>`).join('');
+}
+
+function renderChecklist() {
+  const el=document.getElementById('checklist-dinamico'); if(!el) return;
+  const rain0=WEATHER?WEATHER.forecast[0].rain:0;
+  const items=rain0>=40
+    ?[{text:'Não regar hoje',sub:rain0+'% de chuva prevista',done:false,xp:5}]
+    :[{text:'Verificar umidade da terra',sub:'Enfie o dedo 2cm — só rega se estiver seco',done:false,xp:5}];
+  items.push({text:'Observar as folhas por 1 minuto',sub:'Cor, postura, algo diferente?',done:false,xp:5});
+  items.push({text:'Escolher o vaso para a missão',sub:'Mínimo 15cm de diâmetro',done:true,xp:10});
+  el.innerHTML=items.map(it=>`<div class="checklist-item" onclick="toggleCheck(this,${it.xp})"><div class="check-box ${it.done?'done':''}"></div><div><div class="check-text ${it.done?'done':''}">${it.text}</div><div class="check-sub">${it.sub}</div></div></div>`).join('');
+}
+
+function renderChecklistStatic() {
+  const el=document.getElementById('checklist-dinamico'); if(!el) return;
+  const items=[{text:'Verificar umidade da terra',sub:'Enfie o dedo 2cm — só rega se estiver seco',done:false,xp:5},{text:'Observar as folhas por 1 minuto',sub:'Cor, postura, algo diferente?',done:false,xp:5},{text:'Escolher o vaso para a missão',sub:'Mínimo 15cm de diâmetro',done:true,xp:10}];
+  el.innerHTML=items.map(it=>`<div class="checklist-item" onclick="toggleCheck(this,${it.xp})"><div class="check-box ${it.done?'done':''}"></div><div><div class="check-text ${it.done?'done':''}">${it.text}</div><div class="check-sub">${it.sub}</div></div></div>`).join('');
+}
+
+function preFillTempo() {
+  if(!WEATHER) return;
+  const c=WEATHER.condition;
+  if(c==='sunny') document.getElementById('pre-tempo-sol')?.click();
+  else if(c==='rain'||c==='drizzle'||c==='storm') document.getElementById('pre-tempo-chuva')?.click();
+  else document.getElementById('pre-tempo-nublado')?.click();
+}
+
+function askClimaFull() {
+  const W=WEATHER;
+  const prompt=W
+    ?`Clima atual em Florianópolis: ${W.temp}°C, ${W.desc}, vento ${W.windspeed}km/h. Previsão: hoje ${W.forecast[0].rain}% chuva, amanhã ${W.forecast[1]?.rain||'?'}% chuva. Contexto: sacada NE com morro, sol parcial até ~13h, plantas: cebolinha e salsinha em parapeito. O que devo fazer no canteiro hoje e nos próximos dias?`
+    :'Estou cultivando cebolinha e salsinha em Florianópolis, sacada NE com sol parcial. O que devo fazer no canteiro hoje?';
+  openClaude(prompt);
+}
+
+// ── CALENDÁRIO ──────────────────────────────────────────────────────────
+const calData = {
+  0:{label:'Janeiro',tipo:'quente',dica:'Evite plantar ervas sensíveis — calor intenso. Foque em manter o que já tem.',evitar:'Manjericão queima fácil. Regue mais no verão.',plantar:null},
+  1:{label:'Fevereiro',tipo:'quente',dica:'Ainda quente. Bom para adubar e preparar para o outono.',plantar:null,evitar:'Calor ainda intenso.'},
+  2:{label:'Março',tipo:'bom',dica:'Ótimo para cebolinha, salsinha e tomilho. Temperatura caindo.',plantar:'Cebolinha, Salsinha, Tomilho',evitar:null},
+  3:{label:'Abril',tipo:'bom',dica:'Excelente. Temperatura amena, boa luminosidade. Plantar ervas e morango.',plantar:'Cebolinha, Salsinha, Morango, Tomilho',evitar:null},
+  4:{label:'Maio',tipo:'bom',dica:'Ótimo para ervas de inverno e morango. Temperatura ideal ~18°C.',plantar:'Cebolinha, Salsinha, Morango, Orégano, Tomilho',evitar:'Manjericão e tomate precisam de calor — espere setembro.'},
+  5:{label:'Junho',tipo:'bom',dica:'Inverno ameno em Floripa. Ervas crescem bem. Atenção ao frio à noite.',plantar:'Cebolinha, Salsinha, Alface, Rúcula',evitar:'Manjericão sofre se temperatura cair abaixo de 10°C.'},
+  6:{label:'Julho',tipo:'bom',dica:'Frio mais intenso. Foque em ervas resistentes e acompanhe o morango.',plantar:'Cebolinha, Salsinha, Tomilho',evitar:'Manjericão e basil.'},
+  7:{label:'Agosto',tipo:'bom',dica:'Fim do inverno. Morango em colheita. Prepare para primavera.',plantar:'Cebolinha, Salsinha, começo para morango',evitar:null},
+  8:{label:'Setembro',tipo:'bom',dica:'Primavera! Hora de plantar manjericão e tomate-cereja.',plantar:'Manjericão, Tomate-cereja, Morango, Cebolinha',evitar:null},
+  9:{label:'Outubro',tipo:'quente',dica:'Calor voltando. Bom para tomate e manjericão. Regue mais.',plantar:'Tomate-cereja, Manjericão',evitar:'Alface começa a boltar.'},
+  10:{label:'Novembro',tipo:'quente',dica:'Quente. Tomate e manjericão em alta. Atenção à rega.',plantar:'Tomate-cereja, Manjericão',evitar:'Alface e rúcula sofrem com calor.'},
+  11:{label:'Dezembro',tipo:'quente',dica:'Verão intenso. Mantenha o que já tem. Regue cedo e com frequência.',plantar:null,evitar:'Evite plantar novas mudas no calor do verão.'}
+};
+
+function renderCalendario() {
+  const mes = now.getMonth();
+  const grid = document.getElementById('cal-grid');
+  grid.innerHTML = MONTHS_SHORT.map((m,i)=>{
+    const tipo = calData[i].tipo;
+    const cls = i===mes?'active':tipo==='bom'?'warm':'';
+    return `<div class="cal-month ${cls}"><div class="cal-month-name">${m}</div><div class="cal-dot"></div></div>`;
+  }).join('');
+  const d = calData[mes];
+  document.getElementById('cal-mes-label').textContent = d.label+' em Floripa';
+  let html = `<div class="card"><div class="card-title">${d.dica}</div>`;
+  if(d.plantar) html += `<div class="card-body" style="margin-top:6px"><strong style="color:var(--verde-mid)">Plantar agora:</strong> ${d.plantar}</div>`;
+  html += `</div>`;
+  if(d.evitar) html += `<div class="card" style="background:#fff8f0;border-color:#e8d0a8"><div style="font-size:12px;font-weight:500;color:#6b4a10;margin-bottom:3px">Evite agora</div><div style="font-size:13px;color:#7a5520;line-height:1.6">${d.evitar}</div></div>`;
+  html += `<div class="card"><div class="card-title">Perguntar sobre ${d.label}</div><div class="card-body" style="margin-bottom:10px">Quer um guia detalhado para esse mês em Floripa?</div><button class="btn-outline" style="width:100%;text-align:center" onclick="openClaude('Me dá um guia completo do que fazer no canteiro em ${d.label} em Florianópolis — sacada NE, sol parcial, ervas e frutas pequenas')">Ver guia ↗</button></div>`;
+  document.getElementById('cal-dicas').innerHTML = html;
+}
+
+// ── NAVEGAÇÃO ──────────────────────────────────────────────────────────
+function show(tab) {
+  document.querySelectorAll('.content').forEach(c=>c.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');
+  const tabs=['inicio','clima','diario','fases','plantas','diagnostico','calendario'];
+  document.querySelectorAll('.nav-btn')[tabs.indexOf(tab)]?.classList.add('active');
+  if(tab==='diario') document.getElementById('diario-notif').style.display='none';
+  if(tab==='clima') document.getElementById('clima-notif').style.display='none';
+}
+
+function showDiaryTab(tab,btn) {
+  document.querySelectorAll('.dtab-content').forEach(c=>c.classList.remove('active'));
+  document.querySelectorAll('.dtab').forEach(b=>b.classList.remove('active'));
+  document.getElementById('dtab-'+tab).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ── DIÁRIO ──────────────────────────────────────────────────────────────
+function selInd(btn,group) {
+  btn.closest('.ind-opts').querySelectorAll('.ind-btn').forEach(b=>b.classList.remove('sel'));
+  btn.classList.add('sel');
+  S[group]=btn.dataset.val;
+}
+function togglePlant(tag) {
+  tag.classList.toggle('sel');
+  const name=tag.textContent;
+  if(tag.classList.contains('sel')){if(!S.plantas.includes(name))S.plantas.push(name);}
+  else{S.plantas=S.plantas.filter(p=>p!==name);}
+}
+function selMood(btn) {
+  document.querySelectorAll('.mood-btn').forEach(b=>b.classList.remove('sel'));
+  btn.classList.add('sel');
+  S.mood=btn.dataset.mood;
+}
+
+function saveEntry() {
+  const note=document.getElementById('diary-note').value.trim();
+  const entry={
+    date:now.toLocaleDateString('pt-BR',{weekday:'short',day:'2-digit',month:'short'}).toUpperCase(),
+    saude:S.saude||'—',rega:S.rega||'—',tempo:S.tempo||'—',
+    plantas:S.plantas.length?[...S.plantas]:['Geral'],
+    mood:S.mood,note,
+    clima:WEATHER?{temp:WEATHER.temp,desc:WEATHER.desc,rain:WEATHER.forecast[0].rain}:null
+  };
+  S.entries.unshift(entry);
+  S.registrouHoje=true;
+  addToTimeline(entry);
+  updateXP(10);
+  updateInsights();
+  updateRec(entry);
+  updateInicioCard(entry);
+  updateDiaryStatus();
+  document.getElementById('diary-note').value='';
+  document.querySelectorAll('.ind-btn,.plant-tag,.mood-btn').forEach(b=>b.classList.remove('sel'));
+  S.saude=S.rega=S.tempo=S.mood=null;S.plantas=[];
+  const msg=document.getElementById('saved-msg');
+  msg.style.display='block';
+  setTimeout(()=>msg.style.display='none',2500);
+}
+
+function addToTimeline(entry) {
+  const tl=document.getElementById('timeline');
+  const dc=entry.saude==='ótimas'?'great':entry.saude==='preocupado'?'bad':'ok';
+  const mi={animado:'ti-mood-happy',tranquilo:'ti-mood-smile',preocupado:'ti-mood-confuzed',frustrado:'ti-mood-sad'}[entry.mood]||'ti-mood-smile';
+  const mc={animado:'var(--verde-mid)',tranquilo:'var(--verde-mid)',preocupado:'var(--terra-dark)',frustrado:'#a06060'}[entry.mood]||'var(--text-faint)';
+  const tags=entry.plantas.map(p=>`<span class="tl-tag-item">${p}</span>`).join('');
+  const noteHtml=entry.note?`<div class="tl-text-entry">${entry.note}</div>`:'';
+  const climaHtml=entry.clima?`<div style="font-size:11px;color:var(--text-faint);margin-top:3px"><i class="ti ti-cloud-sun" style="font-size:11px;margin-right:3px"></i>${entry.clima.temp}°C · ${entry.clima.desc}</div>`:'';
+  const div=document.createElement('div');
+  div.className='tl-entry';
+  div.innerHTML=`<div class="tl-left"><div class="tl-dot-tl ${dc}"></div></div><div class="tl-card"><div class="tl-header"><span class="tl-date">${entry.date}</span><span><i class="ti ${mi}" style="font-size:14px;color:${mc}"></i></span></div><div style="margin-bottom:4px">${tags}</div><div><span class="tl-ind"><span>Plantas:</span> ${entry.saude}</span><span class="tl-ind"><span>Regou:</span> ${entry.rega}</span><span class="tl-ind"><span>Tempo:</span> ${entry.tempo}</span></div>${climaHtml}${noteHtml}</div>`;
+  tl.insertBefore(div,tl.firstChild);
+}
+
+function updateXP(delta) {
+  S.xp=Math.min(S.xp+delta,100);
+  document.getElementById('xplabel').textContent=S.xp+' / 100 XP';
+  document.getElementById('xpbar').style.width=S.xp+'%';
+  document.getElementById('stat-xp').textContent=S.xp;
+  if(S.xp>=100) document.getElementById('fase-label').textContent='Fase 2 — Cultivando';
+}
+
+function toggleCheck(item,xp) {
+  const box=item.querySelector('.check-box'),text=item.querySelector('.check-text'),isDone=box.classList.contains('done');
+  box.classList.toggle('done',!isDone);text.classList.toggle('done',!isDone);
+  if(!isDone) updateXP(xp);
+}
+
+function updateInsights() {
+  const total=S.entries.length+3,regas=S.entries.filter(e=>e.rega==='sim').length+2,humor=S.entries.filter(e=>e.mood==='animado'||e.mood==='tranquilo').length+2;
+  document.getElementById('ins-reg').textContent=total;
+  document.getElementById('ins-regas').textContent=regas;
+  document.getElementById('ins-humor').textContent=humor;
+  if(total>=5) document.getElementById('prox-passo-text').textContent='Com '+total+' registros, você já tem uma rotina sólida. Pronto para adicionar o morango ao canteiro.';
+}
+
+function updateRec(entry) {
+  const btn=document.getElementById('rec-btn');
+  const parts=[];
+  if(entry.saude) parts.push('plantas '+entry.saude);
+  if(entry.clima) parts.push(entry.clima.temp+'°C, '+entry.clima.rain+'% chuva');
+  if(entry.note) parts.push('"'+entry.note.substring(0,50)+(entry.note.length>50?'...':'"'));
+  document.getElementById('rec-text').textContent='Último registro: '+parts.join(', ')+'. Quer uma recomendação?';
+  btn.style.display='inline-block';
+}
+
+function updateInicioCard(entry) {
+  const card=document.getElementById('inicio-rec'),text=document.getElementById('inicio-rec-text'),btn=document.getElementById('inicio-rec-btn');
+  const msgs={'ótimas':'Plantas ótimas no último registro! Continue com a rotina.','ok':'Plantas ok. Se algo parecer diferente, o diagnóstico pode ajudar.','preocupado':'Você registrou preocupação. Clique para analisar com base nos seus dados.'};
+  text.textContent=msgs[entry.saude]||'Seu registro foi salvo. Continue observando!';
+  const ctx=`Último registro no Canteiro: plantas ${entry.saude}, regou ${entry.rega}, tempo ${entry.tempo}${entry.clima?` (${entry.clima.temp}°C, ${entry.clima.rain}% chuva)`:''}, plantas: ${entry.plantas.join(', ')}. Nota: "${entry.note}". Contexto: Florianópolis, sacada NE com morro, iniciante, cachorro em casa. O que recomenda como próximo passo?`;
+  btn.onclick=()=>openClaude(ctx);
+  card.style.display='block';
+  document.getElementById('dica-card').style.display='none';
+}
+
+function updateDiaryStatus() {
+  const card=document.getElementById('diary-status-card');
+  if(S.registrouHoje){
+    const last=S.entries[0];
+    card.className='clima-alert ok-clima';
+    card.onclick=()=>show('diario');
+    card.innerHTML=`<i class="ti ti-check clima-alert-icon"></i><div><div class="clima-alert-title">Registrado hoje</div><div class="clima-alert-text">Plantas ${last.saude}, tempo ${last.tempo}. Ótimo!</div></div>`;
+  }
+}
+
+function askRec() {
+  const last=S.entries[0]; if(!last) return;
+  const ctx=`Meu diário do Canteiro: ${S.entries.length+3} registros. Último: plantas ${last.saude}, regou ${last.rega}, tempo ${last.tempo}${last.clima?` (${last.clima.temp}°C)`:''}, nota: "${last.note}".${WEATHER?` Clima atual: ${WEATHER.temp}°C, ${WEATHER.desc}, chuva amanhã: ${WEATHER.forecast[1]?.rain||'?'}%.`:''} Contexto: Florianópolis, sacada NE com morro, iniciante, 5min/dia, cachorro em casa. Qual o próximo passo?`;
+  openClaude(ctx);
+}
+
+// ── CLAUDE LINK ────────────────────────────────────────────────────────
+function openClaude(prompt) {
+  const url = 'https://claude.ai/new?q=' + encodeURIComponent(prompt);
+  window.open(url, '_blank');
+}
+
+// ── INIT ────────────────────────────────────────────────────────────────
+renderCalendario();
+renderChecklistStatic();
+document.getElementById('diario-notif').style.display='inline-block';
+fetchClima();
+</script>
+</body>
+</html>
